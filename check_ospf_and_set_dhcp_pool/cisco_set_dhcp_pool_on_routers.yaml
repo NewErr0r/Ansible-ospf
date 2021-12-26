@@ -1,0 +1,68 @@
+---
+  - name: SET DHCP POOL
+    hosts: R2
+    gather_facts: no
+
+    tasks:
+      - name: SET DHCP POOL_R2_LAN
+        ios_config:
+          parents:
+            - ip dhcp excluded-address 192.168.20.1 192.168.20.10
+            - ip dhcp excluded-address 192.168.20.244 192.168.20.254
+            - ip dhcp pool R2_LAN 192.168.20
+          lines:
+            - network 192.168.20.0 255.255.255.0
+            - default-router 192.168.20.1
+            - domain-name wsr.ru
+
+  - name: SET DHCP POOL
+    hosts: R3
+    gather_facts: no
+
+    tasks:
+      - name: SET DHCP POOL_R3_LAN
+        ios_config:
+          parents:
+            - ip dhcp excluded-address 192.168.30.1 192.168.30.10
+            - ip dhcp excluded-address 192.168.30.244 192.168.30.254
+            - ip dhcp pool R3_LAN 192.168.30
+          lines:
+            - network 192.168.30.0 255.255.255.0
+            - default-router 192.168.30.1
+            - domain-name wsr.ru
+
+  - name: SET DHCP POOL
+    hosts: R4
+    gather_facts: no
+
+    tasks:
+      - name: SET DHCP POOL_R4_LAN
+        ios_config:
+          parents:
+            - ip dhcp excluded-address 192.168.40.1 192.168.40.10
+            - ip dhcp excluded-address 192.168.40.244 192.168.40.254
+            - ip dhcp pool R4_LAN 192.168.40
+          lines:
+            - network 192.168.40.0 255.255.255.0
+            - default-router 192.168.40.1
+            - domain-name wsr.ru
+
+  - name: show dhcp settings
+    hosts: ios
+    gather_facts: no
+
+    tasks:
+      - name: GET DHCP POOL
+        ios_command:
+          commands:
+          - show running-config | section dhcp
+        register: config
+
+      - name: SAVE CONFIG TO ./CONFIG
+        copy:
+          content: "##########DHCP_POOL##########\n\n
+                    {{ config.stdout[0] }}"
+          dest: "config/dhcp_{{ inventory_hostname }}.txt"
+
+
+            

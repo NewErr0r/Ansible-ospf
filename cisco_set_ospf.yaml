@@ -1,0 +1,68 @@
+---
+  - name: SET OSPF R1
+    hosts: R1
+    gather_facts: no
+
+    tasks:
+      - name: OSPF ON R1
+        ios_config:
+          parents: router ospf 1
+          lines:
+            - router-id 1.1.1.1
+            - network 10.10.10.0 0.0.0.255 area 0
+            - network 192.168.1.0 0.0.0.255 area 0
+
+  - name: SET OSPF R2
+    hosts: R2
+    gather_facts: no
+
+    tasks:
+      - name: OSPF ON R2
+        ios_config:
+          parents: router ospf 1
+          lines: 
+            - router-id 2.2.2.2
+            - network 192.168.1.0 0.0.0.255 area 0
+            - network 192.168.2.0 0.0.0.255 area 0
+
+  - name: SHOW OSPF R1
+    hosts: R1
+    gather_facts: no
+
+    tasks:
+      - name: SHOW OSPF 
+        ios_command:
+          commands:
+            - show running-config | section ospf
+            - show ip ospf neighbor
+        register: config
+
+      - name: SAVE CONFIG TO ./config
+        copy:
+          content: "##########SH RUN | SECTION OSPF############\n\n
+                    {{ config.stdout[0] }}\n\n
+                    ##########SH IP OSPF NEIGHBOR\n\n
+                    {{ config.stdout[1] }}"
+          dest: "config/config_{{ inventory_hostname }}.txt"
+
+  - name: SHOW OSPF R2
+    hosts: R2
+    gather_facts: no
+
+    tasks:
+      - name: SHOW OSPF 
+        ios_command:
+          commands:
+            - show running-config | section ospf
+            - show ip ospf neighbor
+        register: config
+
+      - name: SAVE CONFIG TO ./config
+        copy:
+          content: "##########SH RUN | SECTION OSPF############\n\n
+                    {{ config.stdout[0] }}\n\n
+                    ##########SH IP OSPF NEIGHBOR\n\n
+                    {{ config.stdout[1] }}"
+          dest: "config/config_{{ inventory_hostname }}.txt"
+
+

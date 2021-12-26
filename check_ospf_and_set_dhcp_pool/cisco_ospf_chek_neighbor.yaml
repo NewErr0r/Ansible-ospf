@@ -1,0 +1,20 @@
+---
+  - name: SHOW OSPF 
+    hosts: ios
+    gather_facts: no
+
+    tasks:
+      - name: SHOW OSPF 
+        ios_command:
+          commands:
+            - show running-config | section ospf
+            - show ip ospf neighbor
+        register: config
+
+      - name: SAVE CONFIG TO ./config
+        copy:
+          content: "##########SH RUN | SECTION OSPF############\n\n
+                    {{ config.stdout[0] }}\n\n
+                    ##########SH IP OSPF NEIGHBOR\n\n
+                    {{ config.stdout[1] }}"
+          dest: "config/ospf_{{ inventory_hostname }}.txt"
